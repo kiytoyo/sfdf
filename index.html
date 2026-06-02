@@ -377,7 +377,7 @@
             <span class="opt-tag">Optional</span>
           </div>
           <div class="task-action">
-            <a href="https://t.me/ApeSyndicateNFT" target="_blank">Join</a>
+            <a href="https://t.me/ApeSyndicateNFT" target="_blank">Link</a>
           </div>
         </div>
 
@@ -385,6 +385,9 @@
         <div id="submission-form" class="input-group" style="display: none;">
           <label>X (Twitter) Username</label>
           <input type="text" id="input-username" placeholder="Enter username without @">
+
+          <label>X Comment Link (Proof)</label>
+          <input type="url" id="input-comment-link" placeholder="https://x.com/.../status/...">
 
           <label>Ethereum Wallet Address</label>
           <input type="text" id="input-wallet" placeholder="0x...">
@@ -467,10 +470,9 @@
   </div>
 
   <script>
-    // Web App Script URL Placeholder
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzSDBC2ftIRde433-yvR23TnOAtOpImTxnHmcQvSfOv4m2RClgpYh-layeQnIGKPPBm/exec";
+    // Paste your Web App Script URL here
+    const GOOGLE_SCRIPT_URL = "YOUR_NEW_APPS_SCRIPT_URL_HERE";
 
-    // Image list matrix matching perfectly with repository links[cite: 1]
     const IMAGES = [
       "https://i.ibb.co.com/gKh2DDZ/1.jpg", "https://i.ibb.co.com/bRbbbBFg/2.jpg", "https://i.ibb.co.com/JRkY3T8R/4.jpg",
       "https://i.ibb.co.com/mCCrhTLT/3.jpg", "https://i.ibb.co.com/RT2gdfdG/5.jpg", "https://i.ibb.co.com/96GQ0V4/7.jpg",
@@ -484,11 +486,9 @@
       "https://i.ibb.co.com/mVPcNXpf/35.jpg", "https://i.ibb.co.com/27HbVGRD/31.jpg", "https://i.ibb.co.com/d0K62yw4/41.jpg"
     ];
 
-    // Tracking Object State
     let taskStatus = { v1: false, v2: false, v3: false, v4: false, v5: false };
 
     window.addEventListener('DOMContentLoaded', () => {
-      // Restore view from LocalStorage persistence layer tracking
       const savedScreen = localStorage.getItem('current_screen');
       if (savedScreen) {
         goToScreen(savedScreen);
@@ -505,8 +505,6 @@
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       const activeScreen = document.getElementById(`screen-${screenId}`);
       if(activeScreen) activeScreen.classList.add('active');
-      
-      // Keep user locked on successful completion states or specific modules
       localStorage.setItem('current_screen', screenId);
     }
 
@@ -531,28 +529,27 @@
 
     async function submitData() {
       const username = document.getElementById('input-username').value.trim();
+      const commentLink = document.getElementById('input-comment-link').value.trim();
       const wallet = document.getElementById('input-wallet').value.trim();
 
-      if (!username || !wallet) {
+      if (!username || !commentLink || !wallet) {
         alert("Please fill up all information inputs.");
         return;
       }
 
-      // Jump to verification loop window screen layout block
       goToScreen('loading');
 
       try {
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
+        await fetch(GOOGLE_SCRIPT_URL, {
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: username, wallet: wallet })
+          body: JSON.stringify({ username: username, commentLink: commentLink, wallet: wallet })
         });
       } catch (error) {
-        console.log("Data logged via pipeline parameters flow link structural target module.");
+        console.log("Transmission error captured.");
       }
 
-      // Artificial Analysis Wait Timer Matrix Logic
       setTimeout(() => {
         goToScreen('success');
       }, 2500);
@@ -576,11 +573,10 @@
       setInterval(() => {
         counterIndex = (counterIndex + 1) % IMAGES.length;
         imgNode.src = IMAGES[counterIndex];
-      }, 1000); // Shifting speed sequence parameter anchor tracking loop
+      }, 1000);
     }
 
     function initCountdown() {
-      // Future target tracking point limit sequence locked array structure
       const targetTime = new Date("June 5, 2026 13:00:00 UTC").getTime();
       const clockNode = document.getElementById('mint-timer');
 
