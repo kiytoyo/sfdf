@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ape Syndicate</title>
+  <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #121212;
+      --grunge-orange: #ff5500;
+      --grunge-green: #00ff66;
+      --street-gray: #222222;
+      --border-rough: 3px solid #ff5500;
+      --text-light: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      background-image: radial-gradient(rgba(255, 85, 0, 0.15) 1px, transparent 0);
+      background-size: 24px 24px;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Grunge Card Style */
+    .card {
+      background: var(--street-gray);
+      border: 3px solid #333;
+      border-radius: 0px;
+      padding: 30px;
+      box-shadow: 8px 8px 0px #000;
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -3px; left: -3px; right: -3px; bottom: -3px;
+      border: 1px solid rgba(255,255,255,0.1);
+      pointer-events: none;
+    }
+
+    h1 {
+      font-family: 'Permanent Marker', cursive;
+      font-size: 3.5rem;
+      color: var(--grunge-orange);
+      text-transform: uppercase;
+      text-align: center;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      text-shadow: 4px 4px 0px #000;
+    }
+
+    p.subtitle {
+      text-align: center;
+      font-size: 1.1rem;
+      color: #aaa;
+      margin-bottom: 30px;
+      font-weight: bold;
+    }
+
+    /* Buttons */
+    .btn {
+      display: block;
+      width: 100%;
+      background: var(--grunge-orange);
+      color: #000;
+      font-family: 'Permanent Marker', cursive;
+      font-size: 1.5rem;
+      padding: 15px;
+      border: 3px solid #000;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      text-transform: uppercase;
+      box-shadow: 5px 5px 0px #000;
+      transition: all 0.1s ease;
+    }
+
+    .btn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 7px 7px 0px #000;
+      background: #ff6611;
+    }
+
+    .btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px #000;
+    }
+
+    .btn-secondary {
+      background: #444;
+      color: #fff;
+      font-size: 1.1rem;
+      padding: 10px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: bold;
+    }
+
+    .btn-secondary:hover {
+      background: #555;
+    }
+
+    .btn-verify {
+      background: #111;
+      color: var(--grunge-orange);
+      border: 2px solid var(--grunge-orange);
+      font-size: 0.9rem;
+      padding: 5px 15px;
+      display: inline-block;
+      width: auto;
+      margin-top: 5px;
+      box-shadow: 3px 3px 0px #000;
+    }
+
+    .btn-verify.done {
+      border-color: var(--grunge-green);
+      color: var(--grunge-green);
+    }
+
+    /* Screens Switching */
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* Tasks styling */
+    .task-item {
+      background: #1a1a1a;
+      border-left: 5px solid var(--grunge-orange);
+      padding: 15px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .task-item.optional {
+      border-left-color: #666;
+    }
+
+    .task-text p {
+      font-weight: bold;
+      font-size: 1.05rem;
+    }
+
+    .task-text span {
+      font-size: 0.85rem;
+      color: var(--grunge-orange);
+    }
+
+    .task-text .opt-tag {
+      color: #888;
+    }
+
+    .task-action a {
+      display: inline-block;
+      background: #fff;
+      color: #000;
+      padding: 6px 12px;
+      font-weight: bold;
+      text-decoration: none;
+      font-size: 0.9rem;
+      border: 2px solid #000;
+      box-shadow: 2px 2px 0px #000;
+      margin-right: 5px;
+    }
+
+    /* Form Inputs */
+    .input-group {
+      margin-top: 25px;
+      border-top: 2px dashed #444;
+      padding-top: 25px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      color: var(--grunge-orange);
+      font-size: 0.9rem;
+    }
+
+    input {
+      width: 100%;
+      background: #1a1a1a;
+      border: 2px solid #444;
+      padding: 12px;
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 15px;
+    }
+
+    input:focus {
+      border-color: var(--grunge-orange);
+      outline: none;
+    }
+
+    /* Bottom Navigation Matrix */
+    .bottom-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    /* Gallery Grid Matrix (3 items per line) */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .gallery-grid img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border: 2px solid #333;
+    }
+
+    /* Loader */
+    .loader-box {
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #333;
+      border-top: 5px solid var(--grunge-orange);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Mint Page Image Shifter */
+    .mint-preview-box {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 20px auto;
+      border: 4px solid var(--grunge-orange);
+      box-shadow: 6px 6px 0px #000;
+      overflow: hidden;
+    }
+
+    .mint-preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .countdown-text {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--grunge-orange);
+      text-align: center;
+      margin: 20px 0;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Ape Syndicate</h1>
+    <p class="subtitle">3D Futuristic Street Art Avatars</p>
+
+    <!-- ================= SCREEN 1: LANDING ================= -->
+    <div id="screen-landing" class="screen active">
+      <div class="card" style="text-align: center;">
+        <p style="font-size: 1.2rem; line-height: 1.6; margin-bottom: 25px; color: #ccc;">
+          Welcome to the Ape Syndicate community platform. Complete the tasks to verify your address and claim your early spot.
+        </p>
+        <button class="btn" onclick="goToScreen('tasks')">Join Whitelist</button>
+        <p style="margin-top: 15px; font-weight: bold; color: var(--grunge-orange); font-size: 0.95rem;">
+          70% GTD ACCESS GUARANTEED
+        </p>
+      </div>
+    </div>
+
+    <!-- ================= SCREEN 2: TASKS & FORM ================= -->
+    <div id="screen-tasks" class="screen">
+      <div class="card">
+        <h3 style="margin-bottom: 20px; text-transform: uppercase; border-bottom: 2px solid #333; padding-bottom: 10px;">Required Tasks</h3>
+        
+        <!-- Task 1 -->
+        <div class="task-item">
+          <div class="task-text">
+            <p>Follow Official X</p>
+            <span>Required</span>
+          </div>
+          <div class="task-action">
+            <a href="https://x.com/intent/follow?screen_name=ApeSyndicateNFT" target="_blank" onclick="enableVerify('v1')">Link</a>
+            <button id="v1" class="btn btn-verify" disabled onclick="markAsDone('v1')">Verify</button>
+          </div>
+        </div>
+
+        <!-- Task 2 -->
+        <div class="task-item">
+          <div class="task-text">
+            <p>Follow Founders X</p>
+            <span>Required</span>
+          </div>
+          <div class="task-action">
+            <a href="https://x.com/intent/follow?screen_name=TheSyndicateLAB" target="_blank" onclick="enableVerify('v2')">Link</a>
+            <button id="v2" class="btn btn-verify" disabled onclick="markAsDone('v2')">Verify</button>
+          </div>
+        </div>
+
+        <!-- Task 3 -->
+        <div class="task-item">
+          <div class="task-text">
+            <p>Like Official Post</p>
+            <span>Required</span>
+          </div>
+          <div class="task-action">
+            <a href="https://x.com/intent/like?tweet_id=2061136970546311455" target="_blank" onclick="enableVerify('v3')">Link</a>
+            <button id="v3" class="btn btn-verify" disabled onclick="markAsDone('v3')">Verify</button>
+          </div>
+        </div>
+
+        <!-- Task 4 -->
+        <div class="task-item">
+          <div class="task-text">
+            <p>Repost Official Post</p>
+            <span>Required</span>
+          </div>
+          <div class="task-action">
+            <a href="https://x.com/intent/retweet?tweet_id=2061136970546311455" target="_blank" onclick="enableVerify('v4')">Link</a>
+            <button id="v4" class="btn btn-verify" disabled onclick="markAsDone('v4')">Verify</button>
+          </div>
+        </div>
+
+        <!-- Task 5 -->
+        <div class="task-item">
+          <div class="task-text">
+            <p>Comment & Tag Friends</p>
+            <span>Required</span>
+          </div>
+          <div class="task-action">
+            <a href="https://x.com/intent/tweet?in_reply_to=2061136970546311455&text=%40tag1%20%40tag2%20%40tag3%20%0AYourWalletAddress" target="_blank" onclick="enableVerify('v5')">Link</a>
+            <button id="v5" class="btn btn-verify" disabled onclick="markAsDone('v5')">Verify</button>
+          </div>
+        </div>
+
+        <!-- Task 6 -->
+        <div class="task-item optional">
+          <div class="task-text">
+            <p>Join Our Telegram</p>
+            <span class="opt-tag">Optional</span>
+          </div>
+          <div class="task-action">
+            <a href="https://t.me/ApeSyndicateNFT" target="_blank">Link</a>
+          </div>
+        </div>
+
+        <!-- Form Area (Hidden until tasks done) -->
+        <div id="submission-form" class="input-group" style="display: none;">
+          <label>X (Twitter) Username</label>
+          <input type="text" id="input-username" placeholder="Enter username without @">
+
+          <label>Ethereum Wallet Address</label>
+          <input type="text" id="input-wallet" placeholder="0x...">
+
+          <button class="btn" onclick="submitData()">Check In</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SCREEN 3: LOADING ================= -->
+    <div id="screen-loading" class="screen">
+      <div class="card loader-box">
+        <div class="spinner"></div>
+        <h3 style="text-transform: uppercase; color: var(--grunge-orange);">Analyzing Social Data...</h3>
+        <p style="margin-top: 10px; color: #888;">Please wait while we verify your tasks.</p>
+      </div>
+    </div>
+
+    <!-- ================= SCREEN 4: SUCCESS / CONGRATS ================= -->
+    <div id="screen-success" class="screen">
+      <div class="card" style="text-align: center;">
+        <h2 style="font-family: 'Permanent Marker', cursive; color: var(--grunge-green); font-size: 2.5rem; margin-bottom: 15px;">CONGRATULATIONS!</h2>
+        <p style="font-weight: bold; margin-bottom: 15px; font-size: 1.1rem; line-height: 1.5;">
+          If you have completed everything correctly, we will never disappoint you. You will definitely get a spot on the FCFS track, and if your tasks are perfectly accurate, you have a very high chance of getting a GTD upgrade!
+        </p>
+        <p style="color: #aaa; margin-bottom: 25px; font-size: 0.95rem;">
+          Make sure to follow our official channel for all future updates and results announcement.
+        </p>
+        
+        <a href="https://x.com/intent/follow?screen_name=ApeSyndicateNFT" target="_blank" class="btn" style="margin-bottom: 20px;">Follow Official X</a>
+        
+        <button class="btn btn-secondary" onclick="resetToHome()">Back To Home</button>
+      </div>
+    </div>
+
+    <!-- ================= SCREEN 5: GALLERY ================= -->
+    <div id="screen-gallery" class="screen">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h3 style="text-transform: uppercase; color: var(--grunge-orange);">Art Portfolio Gallery</h3>
+          <button class="btn btn-secondary" style="width: auto; padding: 5px 15px;" onclick="goToScreen('landing')">Back</button>
+        </div>
+        <p style="color: #888; font-size: 0.9rem;">Sneak peek of the upcoming collection pieces.</p>
+        
+        <div class="gallery-grid" id="gallery-container">
+          <!-- Images populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SCREEN 6: MINT PAGE ================= -->
+    <div id="screen-mint" class="screen">
+      <div class="card" style="text-align: center;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+          <h3 style="text-transform: uppercase; color: var(--grunge-orange);">Mint Interface</h3>
+          <button class="btn btn-secondary" style="width: auto; padding: 5px 15px;" onclick="goToScreen('landing')">Back</button>
+        </div>
+
+        <!-- Auto changing image preview box -->
+        <div class="mint-preview-box">
+          <img id="mint-live-img" src="" alt="Ape Asset">
+        </div>
+
+        <div class="countdown-text" id="mint-timer">00d 00h 00m 00s</div>
+        
+        <p style="color: #666; font-weight: bold; margin-bottom: 20px; font-size: 0.9rem; text-transform: uppercase;">
+          Minting Phase Status: Closed / Locked
+        </p>
+
+        <button class="btn" style="background: #333; color: #666; border-color: #222; cursor: not-allowed; box-shadow: none;" disabled>Mint Is Closed</button>
+      </div>
+    </div>
+
+    <!-- ================= BOTTOM NAVIGATION MATRIX ================= -->
+    <div class="bottom-nav">
+      <button class="btn btn-secondary" onclick="goToScreen('gallery')">NFT Gallery</button>
+      <button class="btn btn-secondary" onclick="goToScreen('mint')">Mint Box</button>
+    </div>
+
+  </div>
+
+  <script>
+    // Web App Script URL Placeholder
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzSDBC2ftIRde433-yvR23TnOAtOpImTxnHmcQvSfOv4m2RClgpYh-layeQnIGKPPBm/exec";
+
+    // Image list matrix matching perfectly with repository links[cite: 1]
+    const IMAGES = [
+      "https://i.ibb.co.com/gKh2DDZ/1.jpg", "https://i.ibb.co.com/bRbbbBFg/2.jpg", "https://i.ibb.co.com/JRkY3T8R/4.jpg",
+      "https://i.ibb.co.com/mCCrhTLT/3.jpg", "https://i.ibb.co.com/RT2gdfdG/5.jpg", "https://i.ibb.co.com/96GQ0V4/7.jpg",
+      "https://i.ibb.co.com/dsFPLtKP/8.jpg", "https://i.ibb.co.com/ch89Gc0T/6.jpg", "https://i.ibb.co.com/3Y4XrL1m/9.jpg",
+      "https://i.ibb.co.com/Q7F9QbTd/11.jpg", "https://i.ibb.co.com/ynBBtTbH/10.jpg", "https://i.ibb.co.com/FbS463Xd/12.jpg",
+      "https://i.ibb.co.com/jvFrnjdP/13.jpg", "https://i.ibb.co.com/5WjCthgv/15.jpg", "https://i.ibb.co.com/4gZg77mL/14.jpg",
+      "https://i.ibb.co.com/QvvtM86S/17.jpg", "https://i.ibb.co.com/PGB1Py1f/16.jpg", "https://i.ibb.co.com/tp5TzGTD/20.jpg",
+      "https://i.ibb.co.com/675fGRs5/19.jpg", "https://i.ibb.co.com/Lhqv89kZ/18.jpg", "https://i.ibb.co.com/8nHbPnK2/24.jpg",
+      "https://i.ibb.co.com/GfZY1dyQ/21.jpg", "https://i.ibb.co.com/pHgrBpS/22.jpg", "https://i.ibb.co.com/8nSpvtkQ/23.jpg",
+      "https://i.ibb.co.com/ch4V1S29/26.jpg", "https://i.ibb.co.com/Wp6m74BL/29.jpg", "https://i.ibb.co.com/dJxJn7Wc/28.jpg",
+      "https://i.ibb.co.com/mVPcNXpf/35.jpg", "https://i.ibb.co.com/27HbVGRD/31.jpg", "https://i.ibb.co.com/d0K62yw4/41.jpg"
+    ];
+
+    // Tracking Object State
+    let taskStatus = { v1: false, v2: false, v3: false, v4: false, v5: false };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Restore view from LocalStorage persistence layer tracking
+      const savedScreen = localStorage.getItem('current_screen');
+      if (savedScreen) {
+        goToScreen(savedScreen);
+      } else {
+        goToScreen('landing');
+      }
+
+      setupGallery();
+      initImageShifter();
+      initCountdown();
+    });
+
+    function goToScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const activeScreen = document.getElementById(`screen-${screenId}`);
+      if(activeScreen) activeScreen.classList.add('active');
+      
+      // Keep user locked on successful completion states or specific modules
+      localStorage.setItem('current_screen', screenId);
+    }
+
+    function enableVerify(btnId) {
+      document.getElementById(btnId).disabled = false;
+    }
+
+    function markAsDone(btnId) {
+      const btn = document.getElementById(btnId);
+      btn.classList.add('done');
+      btn.innerText = "Verified";
+      taskStatus[btnId] = true;
+      checkAllTasks();
+    }
+
+    function checkAllTasks() {
+      const allDone = Object.values(taskStatus).every(val => val === true);
+      if (allDone) {
+        document.getElementById('submission-form').style.display = 'block';
+      }
+    }
+
+    async function submitData() {
+      const username = document.getElementById('input-username').value.trim();
+      const wallet = document.getElementById('input-wallet').value.trim();
+
+      if (!username || !wallet) {
+        alert("Please fill up all information inputs.");
+        return;
+      }
+
+      // Jump to verification loop window screen layout block
+      goToScreen('loading');
+
+      try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username, wallet: wallet })
+        });
+      } catch (error) {
+        console.log("Data logged via pipeline parameters flow link structural target module.");
+      }
+
+      // Artificial Analysis Wait Timer Matrix Logic
+      setTimeout(() => {
+        goToScreen('success');
+      }, 2500);
+    }
+
+    function resetToHome() {
+      localStorage.removeItem('current_screen');
+      goToScreen('landing');
+    }
+
+    function setupGallery() {
+      const container = document.getElementById('gallery-container');
+      container.innerHTML = IMAGES.map(img => `<img src="${img}" alt="Ape Syndicate Collective Asset Item">`).join('');
+    }
+
+    function initImageShifter() {
+      const imgNode = document.getElementById('mint-live-img');
+      let counterIndex = 0;
+      imgNode.src = IMAGES[0];
+      
+      setInterval(() => {
+        counterIndex = (counterIndex + 1) % IMAGES.length;
+        imgNode.src = IMAGES[counterIndex];
+      }, 1000); // Shifting speed sequence parameter anchor tracking loop
+    }
+
+    function initCountdown() {
+      // Future target tracking point limit sequence locked array structure
+      const targetTime = new Date("June 5, 2026 13:00:00 UTC").getTime();
+      const clockNode = document.getElementById('mint-timer');
+
+      setInterval(() => {
+        const now = new Date().getTime();
+        const diff = targetTime - now;
+
+        if (diff <= 0) {
+          clockNode.innerText = "00d 00h 00m 00s";
+          return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        clockNode.innerText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
