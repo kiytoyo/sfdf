@@ -367,6 +367,16 @@
             font-weight: 700;
             font-size: 12px;
             cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .claim-btn-node:hover {
+            background: #059669;
+        }
+
+        .claim-btn-node:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
         }
 
         .empty-state-msg {
@@ -540,7 +550,6 @@
 
         <section class="glass-panel">
             <h3 class="dashboard-title">Top Holders Rewards Live</h3>
-            
             <div class="reward-structure-grid">
                 <div class="reward-tier-card"><h4>Rank 1</h4><p>0.500 ETH</p></div>
                 <div class="reward-tier-card"><h4>Ranks 2 - 10</h4><p>0.100 ETH</p></div>
@@ -562,7 +571,7 @@
                     </thead>
                     <tbody id="leaderboardDataBody">
                         <tr>
-                            <td colspan="5" class="empty-state-msg">No active mint data discovered on-chain yet. Table will populate automatically.</td>
+                            <td colspan="5" class="empty-state-msg">Scanning live blockchain data... Table will populate automatically.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -590,361 +599,349 @@
 
     <script>
         const TARGET_CONTRACT = "0xa744f823A34fE99f753f7a511e32EAb806117D1a";
-        const SYSTEM_RPC = "https://eth-mainnet.g.alchemy.com/v2/fYKMDL9NELcMLpplFxENG"; 
-
+        const SYSTEM_RPC = "https://eth-mainnet.g.alchemy.com/v2/Jei0hdBnB76TsRhZsnx4e";
+        
         const COMPACT_ABI = [
             {"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
             {"inputs":[],"name":"currentPhase","outputs":[{"internalType":"enum ApeSyndicate.Phase","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
             {"inputs":[],"name":"isMintCompleted","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"gtdWhitelist","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"fcfsWhitelist","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
             {"inputs":[],"name":"mintGTD","outputs":[],"stateMutability":"nonpayable","type":"function"},
             {"inputs":[{"internalType":"uint256","name":"quantity","type":"uint256"}],"name":"mintFCFS","outputs":[],"stateMutability":"payable","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"quantity","type":"uint256"}],"name":"mintPublic","outputs":[],"stateMutability":"payable","type":"function"},
-            {"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenOfOwnerByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
+            {"inputs":[{"internalType":"uint256","name":"quantity","type":"uint256"}],"name":"mintPublic","outputs":[],"stateMutability":"payable","type":"function"}
         ];
 
-        let globalInjectedWeb3Provider = null;
-        let activeEthersSignerInstance = null;
-        let userConnectedWalletAddress = null;
+        let walletConnectedInstance = null;
+        let activeUserWalletAddress = null;
+        let baseRpcProvider = new ethers.providers.JsonRpcProvider(SYSTEM_RPC);
+        let mintContractNode = new ethers.Contract(TARGET_CONTRACT, COMPACT_ABI, baseRpcProvider);
 
-        const baseStaticRpcProvider = new ethers.providers.JsonRpcProvider(SYSTEM_RPC);
-        const activeViewContractNode = new ethers.Contract(TARGET_CONTRACT, COMPACT_ABI, baseStaticRpcProvider);
+        let currentPhase = 0;
+        let slideshowIndex = 1;
 
         window.addEventListener('DOMContentLoaded', () => {
-            initiateSlideshowEngine();
-            synchronizeBlockchainStateData();
-            listenToLiveContractEvents();
-            setInterval(synchronizeBlockchainStateData, 10000); 
+            initializeSystemStateSync();
+            setInterval(rotateSlideshowImages, 2500);
+            setInterval(synchronizeBlockchainStateData, 12000);
         });
 
-        function initiateSlideshowEngine() {
-            let index = 1;
+        function rotateSlideshowImages() {
+            slideshowIndex = slideshowIndex >= 5 ? 1 : slideshowIndex + 1;
             const frameA = document.getElementById('slideshowFrameA');
             const frameB = document.getElementById('slideshowFrameB');
             
-            setInterval(() => {
-                index = index >= 555 ? 1 : index + 1;
-                if (frameA.style.opacity == "1") {
-                    frameB.src = `https://apesyndicate.github.io/ApeSyndicateImage/${index}.png`;
-                    frameA.style.opacity = "0";
-                    frameB.style.opacity = "1";
-                } else {
-                    frameA.src = `https://apesyndicate.github.io/ApeSyndicateImage/${index}.png`;
-                    frameA.style.opacity = "1";
-                    frameB.style.opacity = "0";
+            if (frameA.style.opacity == 1) {
+                frameB.src = `https://apesyndicate.github.io/ApeSyndicateImage/${slideshowIndex}.png`;
+                frameA.style.opacity = 0;
+                frameB.style.opacity = 1;
+            } else {
+                frameA.src = `https://apesyndicate.github.io/ApeSyndicateImage/${slideshowIndex}.png`;
+                frameA.style.opacity = 1;
+                frameB.style.opacity = 0;
+            }
+        }
+
+        function openWalletSelectionPortal() {
+            document.getElementById('providerSelectionModal').classList.add('active');
+        }
+
+        function closeWalletSelectionPortal() {
+            document.getElementById('providerSelectionModal').classList.remove('active');
+        }
+
+        async function processProviderRouting(providerId) {
+            closeWalletSelectionPortal();
+            let selectedInjectedProvider = null;
+
+            if (providerId === 'metamask' && window.ethereum?.isMetaMask) selectedInjectedProvider = window.ethereum;
+            else if (providerId === 'okx' && window.okxwallet) selectedInjectedProvider = window.okxwallet;
+            else if (providerId === 'phantom' && window.phantom?.ethereum) selectedInjectedProvider = window.phantom.ethereum;
+            else if (providerId === 'keplr' && window.keplr) alert("Keplr EVM mode must be explicitly invoked via injected layer.");
+            else selectedInjectedProvider = window.ethereum;
+
+            if (!selectedInjectedProvider) {
+                alert("Requested Web3 target framework was not detected. Please install extensions.");
+                return;
+            }
+
+            try {
+                walletConnectedInstance = new ethers.providers.Web3Provider(selectedInjectedProvider);
+                const networkDetails = await walletConnectedInstance.getNetwork();
+                if (networkDetails.chainId !== 1) {
+                    try {
+                        await selectedInjectedProvider.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x1' }],
+                        });
+                        walletConnectedInstance = new ethers.providers.Web3Provider(selectedInjectedProvider);
+                    } catch (switchError) {
+                        alert("Please configure your active Web3 engine to Ethereum Mainnet manually.");
+                        return;
+                    }
                 }
-            }, 3000);
+
+                const userAccountsList = await walletConnectedInstance.send("eth_requestAccounts", []);
+                activeUserWalletAddress = userAccountsList[0];
+                
+                const clippedAddr = `${activeUserWalletAddress.substring(0, 6)}...${activeUserWalletAddress.substring(38)}`;
+                document.getElementById('walletMasterBtn').innerText = clippedAddr;
+                
+                mintContractNode = new ethers.Contract(TARGET_CONTRACT, COMPACT_ABI, walletConnectedInstance.getSigner());
+                synchronizeBlockchainStateData();
+            } catch (err) {
+                console.error(err);
+                alert("User rejected account synchronization authorization.");
+            }
+        }
+
+        function updateQuantityValue(delta) {
+            const view = document.getElementById('mintQtyView');
+            let currentVal = parseInt(view.value) + delta;
+            if (currentVal < 1) currentVal = 1;
+            if (currentVal > 10) currentVal = 10;
+            view.value = currentVal;
+        }
+
+        async function initializeSystemStateSync() {
+            await synchronizeBlockchainStateData();
         }
 
         async function synchronizeBlockchainStateData() {
             try {
-                const fetchedSupply = await activeViewContractNode.totalSupply();
-                const totalInt = fetchedSupply.toNumber();
-                document.getElementById('globalSupplyCount').innerText = totalInt;
-                
-                processOnChainTransferLogs();
-                if(userConnectedWalletAddress) {
-                    evaluateUserEligibilityMetrics();
+                const totalMintedTokens = await mintContractNode.totalSupply();
+                document.getElementById('globalSupplyCount').innerText = totalMintedTokens.toString();
+
+                try {
+                    currentPhase = await mintContractNode.currentPhase();
+                } catch (e) {
+                    currentPhase = 3; 
                 }
+
+                if (activeUserWalletAddress) {
+                    const isGtdWhitelisted = await mintContractNode.gtdWhitelist(activeUserWalletAddress);
+                    const isFcfsWhitelisted = await mintContractNode.fcfsWhitelist(activeUserWalletAddress);
+
+                    configureElementIndicator('gtdStatusBox', isGtdWhitelisted);
+                    configureElementIndicator('fcfsStatusBox', isFcfsWhitelisted);
+                    configureElementIndicator('publicStatusBox', true);
+
+                    await pipelineUserCollectionPortfolio();
+                }
+
+                await pullTopHoldersLiveDataset(totalMintedTokens.toNumber());
+                await pullRecentLiveDispatchedMints(totalMintedTokens.toNumber());
             } catch (err) {
-                console.error("RPC synchronization stream error:", err);
+                console.error("State Synchronization Failure Logged:", err);
             }
         }
 
-        function listenToLiveContractEvents() {
-            const transferFilter = {
-                address: TARGET_CONTRACT,
-                topics: [ethers.utils.id("Transfer(address,address,uint256)")]
-            };
-            baseStaticRpcProvider.on(transferFilter, (log) => {
-                synchronizeBlockchainStateData();
-            });
+        function configureElementIndicator(elemId, statusFlag) {
+            const block = document.getElementById(elemId);
+            block.className = `eligibility-indicator status-${statusFlag}`;
+            block.innerText = statusFlag ? "Eligible" : "Ineligible";
         }
 
-        function openWalletSelectionPortal() { document.getElementById('providerSelectionModal').classList.add('active'); }
-        function closeWalletSelectionPortal() { document.getElementById('providerSelectionModal').classList.remove('active'); }
-
-        async function processProviderRouting(chosenKey) {
-            let selectedRuntimeProvider = null;
-            try {
-                if (chosenKey === "metamask" && window.ethereum) {
-                    if (window.ethereum.providers && window.ethereum.providers.length > 0) {
-                        selectedRuntimeProvider = window.ethereum.providers.find(p => p.isMetaMask) || window.ethereum.providers[0];
-                    } else if (window.ethereum.isMetaMask) {
-                        selectedRuntimeProvider = window.ethereum;
-                    }
-                } else if (chosenKey === "okx" && window.okxwallet) {
-                    selectedRuntimeProvider = window.okxwallet;
-                } else if (chosenKey === "phantom" && window.phantom && window.phantom.ethereum) {
-                    selectedRuntimeProvider = window.phantom.ethereum;
-                } else if (chosenKey === "keplr" && window.keplr && window.keplr.ethereum) {
-                    selectedRuntimeProvider = window.keplr.ethereum;
-                } else if (chosenKey === "injected" && window.ethereum) {
-                    selectedRuntimeProvider = window.ethereum;
-                }
-
-                if(!selectedRuntimeProvider) {
-                    alert("Wallet extension node not detected. Please install context.");
-                    return;
-                }
-
-                globalInjectedWeb3Provider = new ethers.providers.Web3Provider(selectedRuntimeProvider);
-                const requestedAccounts = await selectedRuntimeProvider.request({ method: 'eth_requestAccounts' });
-                
-                if(requestedAccounts.length > 0) {
-                    userConnectedWalletAddress = requestedAccounts[0];
-                    activeEthersSignerInstance = globalInjectedWeb3Provider.getSigner();
-                    document.getElementById('walletMasterBtn').innerText = userConnectedWalletAddress.slice(0,6) + "..." + userConnectedWalletAddress.slice(-4);
-                    closeWalletSelectionPortal();
-                    evaluateUserEligibilityMetrics();
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Connection routing sequence rejected.");
-            }
-        }
-
-        async function processOnChainTransferLogs() {
-            try {
-                const topicTransfer = ethers.utils.id("Transfer(address,address,uint256)");
-                const hexZero = ethers.utils.hexZeroPad(ethers.constants.AddressZero, 32);
-                
-                const rawLogs = await baseStaticRpcProvider.getLogs({
-                    fromBlock: "0x0",
-                    toBlock: "latest",
-                    address: TARGET_CONTRACT,
-                    topics: [topicTransfer]
-                });
-
-                const holderMap = {};
-                const galleryContainer = document.getElementById('globalGalleryFeedBox');
-                galleryContainer.innerHTML = "";
-
-                if (rawLogs.length === 0) {
-                    document.getElementById('leaderboardDataBody').innerHTML = `
-                        <tr><td colspan="5" class="empty-state-msg">No active mint data discovered on-chain yet. Table will populate automatically.</td></tr>
-                    `;
-                    return;
-                }
-
-                rawLogs.forEach((log) => {
-                    const fromAddress = ethers.utils.defaultAbiCoder.decode(["address"], log.topics[1])[0].toLowerCase();
-                    const recipientAddress = ethers.utils.defaultAbiCoder.decode(["address"], log.topics[2])[0].toLowerCase();
-                    const tokenId = ethers.BigNumber.from(log.topics[3]).toNumber();
-
-                    if (fromAddress !== ethers.constants.AddressZero.toLowerCase()) {
-                        if (holderMap[fromAddress]) {
-                            holderMap[fromAddress] = holderMap[fromAddress] - 1;
-                            if (holderMap[fromAddress] <= 0) delete holderMap[fromAddress];
-                        }
-                    }
-
-                    if (recipientAddress !== ethers.constants.AddressZero.toLowerCase()) {
-                        holderMap[recipientAddress] = (holderMap[recipientAddress] || 0) + 1;
-                    }
-
-                    if (fromAddress === ethers.constants.AddressZero.toLowerCase()) {
-                        const feedCard = document.createElement('div');
-                        feedCard.className = "gallery-card";
-                        feedCard.innerHTML = `
-                            <img src="https://apesyndicate.github.io/ApeSyndicateImage/${tokenId}.png" onerror="this.src='https://placehold.co/120x120/f3e8ff/7c3aed?text=APE'">
-                            <p>Syndicate #${tokenId}</p>
-                        `;
-                        if (galleryContainer.firstChild) {
-                            galleryContainer.insertBefore(feedCard, galleryContainer.firstChild);
-                        } else {
-                            galleryContainer.appendChild(feedCard);
-                        }
-                    }
-                });
-
-                const sortedHolders = Object.entries(holderMap)
-                    .map(([address, count]) => ({ address, count }))
-                    .filter(h => h.count > 0 && h.address !== ethers.constants.AddressZero.toLowerCase())
-                    .sort((a, b) => b.count - a.count);
-
-                renderProductionLeaderboard(sortedHolders);
-            } catch (err) {
-                console.error("Failed compiling logs from Alchemy endpoint:", err);
-            }
-        }
-
-        async function renderProductionLeaderboard(sortedHolders) {
-            const tbody = document.getElementById('leaderboardDataBody');
-            tbody.innerHTML = "";
-
-            const isMintCompleted = await activeViewContractNode.isMintCompleted();
-            const boundaryMax = Math.min(sortedHolders.length, 55);
-
-            if (boundaryMax === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="empty-state-msg">No active owners discovered on-chain yet.</td></tr>`;
-                return;
-            }
-
-            for (let rank = 1; rank <= boundaryMax; rank++) {
-                const entity = sortedHolders[rank - 1];
-                const cleanAddress = entity.address;
-                const formattedAddress = cleanAddress.slice(0, 6) + "..." + cleanAddress.slice(-4);
-                
-                let rewardText = "0.008 ETH";
-                let rawRewardValue = "0.008";
-                if(rank === 1) { rewardText = "0.500 ETH"; rawRewardValue = "0.5"; }
-                else if(rank >= 2 && rank <= 10) { rewardText = "0.100 ETH"; rawRewardValue = "0.1"; }
-                else if(rank >= 11 && rank <= 20) { rewardText = "0.050 ETH"; rawRewardValue = "0.05"; }
-                else if(rank >= 21 && rank <= 30) { rewardText = "0.020 ETH"; rawRewardValue = "0.02"; }
-
-                const row = document.createElement('tr');
-                let actionCell = `<span style="color:var(--text-muted); font-size:12px; font-weight:600;">Locked until 24h post-mint</span>`;
-                
-                if (isMintCompleted && userConnectedWalletAddress && cleanAddress.toLowerCase() === userConnectedWalletAddress.toLowerCase()) {
-                    actionCell = `<button class="claim-btn-node" onclick="executeClaimSequence('${rawRewardValue}')">Claim ${rewardText}</button>`;
-                } else if (isMintCompleted) {
-                    actionCell = `<span style="color:#10b981; font-weight:700; font-size:13px;">Unlocked</span>`;
-                }
-
-                row.innerHTML = `
-                    <td style="font-weight:800; color:${rank===1?'var(--primary-purple)':'var(--text-main)'}">#${rank}</td>
-                    <td style="font-family:'Space Grotesk', monospace; font-size:13px;">${formattedAddress}</td>
-                    <td style="font-weight:600;">${entity.count} NFTs</td>
-                    <td style="font-weight:700; color:var(--primary-purple);">${rewardText}</td>
-                    <td>${actionCell}</td>
-                `;
-                tbody.appendChild(row);
-            }
-        }
-
-        async function evaluateUserEligibilityMetrics() {
-            if(!userConnectedWalletAddress) return;
-            try {
-                const gtdBox = document.getElementById('gtdStatusBox');
-                const fcfsBox = document.getElementById('fcfsStatusBox');
-                const publicBox = document.getElementById('publicStatusBox');
-
-                const [isGtd, isFcfs, balanceRaw] = await Promise.all([
-                    activeViewContractNode.gtdWhitelist(userConnectedWalletAddress),
-                    activeViewContractNode.fcfsWhitelist(userConnectedWalletAddress),
-                    activeViewContractNode.balanceOf(userConnectedWalletAddress)
-                ]);
-
-                const userBalance = balanceRaw.toNumber();
-                document.getElementById('userPortfolioSize').innerText = userBalance;
-
-                gtdBox.className = "eligibility-indicator status-false"; gtdBox.innerText = "Not Eligible";
-                fcfsBox.className = "eligibility-indicator status-false"; fcfsBox.innerText = "Not Eligible";
-                publicBox.className = "eligibility-indicator status-true"; publicBox.innerText = "Eligible";
-
-                if (isGtd) {
-                    gtdBox.className = "eligibility-indicator status-true"; gtdBox.innerText = "Eligible";
-                    fcfsBox.className = "eligibility-indicator status-true"; fcfsBox.innerText = "Eligible";
-                } else if (isFcfs) {
-                    fcfsBox.className = "eligibility-indicator status-true"; fcfsBox.innerText = "Eligible";
-                }
-
-                renderUserInventoryGrid(userBalance);
-            } catch (err) {
-                console.error("Context checking pipeline error:", err);
-            }
-        }
-
-        async function renderUserInventoryGrid(balance) {
+        async function pipelineUserCollectionPortfolio() {
             const container = document.getElementById('userInventoryDisplayRow');
-            container.innerHTML = "";
-            if (balance === 0) {
-                container.innerHTML = `<p class="empty-state-msg">Your wallet does not hold any tokens of this collection yet.</p>`;
+            try {
+                const balance = await mintContractNode.balanceOf(activeUserWalletAddress);
+                document.getElementById('userPortfolioSize').innerText = balance.toString();
+
+                if (balance.toNumber() === 0) {
+                    container.innerHTML = `<p class="empty-state-msg">Zero active holdings registered under your current account configuration.</p>`;
+                    return;
+                }
+
+                container.innerHTML = `<p class="empty-state-msg" style="width:100%;">Assembling portfolio details...</p>`;
+                
+                let inventoryBlocksHtml = "";
+                const maxSupplyScan = 555;
+                let identifiedCounter = 0;
+
+                for (let i = 1; i <= maxSupplyScan; i++) {
+                    if (identifiedCounter >= balance.toNumber()) break;
+                    try {
+                        const tokenOwnerAddress = await mintContractNode.ownerOf(i);
+                        if (tokenOwnerAddress.toLowerCase() === activeUserWalletAddress.toLowerCase()) {
+                            identifiedCounter++;
+                            let placeholderIndex = (i % 5) + 1;
+                            inventoryBlocksHtml += `
+                                <div class="asset-node">
+                                    <img src="https://apesyndicate.github.io/ApeSyndicateImage/${placeholderIndex}.png">
+                                    <span>Syndicate #${i}</span>
+                                </div>
+                            `;
+                        }
+                    } catch (e) {}
+                }
+
+                container.innerHTML = inventoryBlocksHtml || `<p class="empty-state-msg">No metadata linked to holdings.</p>`;
+            } catch (err) {
+                container.innerHTML = `<p class="empty-state-msg">Failed to query user wallet portfolio.</p>`;
+            }
+        }
+
+        async function pullTopHoldersLiveDataset(totalMinted) {
+            const tbody = document.getElementById('leaderboardDataBody');
+            if (totalMinted === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="empty-state-msg">No active mint data discovered on-chain yet. Table will populate automatically.</td></tr>`;
                 return;
             }
 
             try {
-                // Tracking 0-indexed tokens according to ERC721A mint order logs
-                const topicTransfer = ethers.utils.id("Transfer(address,address,uint256)");
-                const rawLogs = await baseStaticRpcProvider.getLogs({
-                    fromBlock: "0x0",
-                    toBlock: "latest",
-                    address: TARGET_CONTRACT,
-                    topics: [topicTransfer]
-                });
-
-                const ownedTokenIds = [];
-                rawLogs.forEach((log) => {
-                    const fromAddress = ethers.utils.defaultAbiCoder.decode(["address"], log.topics[1])[0].toLowerCase();
-                    const recipientAddress = ethers.utils.defaultAbiCoder.decode(["address"], log.topics[2])[0].toLowerCase();
-                    const tokenId = ethers.BigNumber.from(log.topics[3]).toNumber();
-
-                    if (recipientAddress === userConnectedWalletAddress.toLowerCase()) {
-                        if (!ownedTokenIds.includes(tokenId)) ownedTokenIds.push(tokenId);
+                let ownersMap = {};
+                const chunkUnit = 50; 
+                
+                for (let baseIndex = 1; baseIndex <= totalMinted; baseIndex += chunkUnit) {
+                    let promiseGroup = [];
+                    let endBound = Math.min(baseIndex + chunkUnit - 1, totalMinted);
+                    
+                    for (let tokenID = baseIndex; tokenID <= endBound; tokenID++) {
+                        promiseGroup.push(
+                            mintContractNode.ownerOf(tokenID).then(addr => ({ id: tokenID, owner: addr })).catch(() => null)
+                        );
                     }
-                    if (fromAddress === userConnectedWalletAddress.toLowerCase()) {
-                        const idx = ownedTokenIds.indexOf(tokenId);
-                        if (idx > -1) ownedTokenIds.splice(idx, 1);
-                    }
-                });
-
-                if (ownedTokenIds.length === 0) {
-                    container.innerHTML = `<p class="empty-state-msg">Your wallet does not hold any tokens of this collection yet.</p>`;
-                    return;
+                    
+                    const batchResults = await Promise.all(promiseGroup);
+                    batchResults.forEach(item => {
+                        if (item && item.owner) {
+                            ownersMap[item.owner] = (ownersMap[item.owner] || 0) + 1;
+                        }
+                    });
                 }
 
-                ownedTokenIds.forEach((id) => {
-                    const node = document.createElement('div');
-                    node.className = "asset-node";
-                    node.innerHTML = `
-                        <img src="https://apesyndicate.github.io/ApeSyndicateImage/${id}.png" onerror="this.src='https://placehold.co/100x100/f3e8ff/7c3aed?text=APE'">
-                        <span>Syndicate #${id}</span>
-                    `;
-                    container.appendChild(node);
-                });
-            } catch (error) {
-                // Fallback rendering map if log compilation lags
-                for (let i = 0; i < balance; i++) {
-                    const node = document.createElement('div');
-                    node.className = "asset-node";
-                    node.innerHTML = `
-                        <img src="https://placehold.co/100x100/f3e8ff/7c3aed?text=APE" style="opacity:0.6;">
-                        <span>Syndicate Asset</span>
-                    `;
-                    container.appendChild(node);
+                let sortedHolders = [];
+                for (let addr in ownersMap) {
+                    sortedHolders.push({ address: addr, count: ownersMap[addr] });
                 }
+                sortedHolders.sort((first, second) => second.count - first.count);
+
+                let leaderboardRowsHtml = "";
+                const displayRowsLimit = Math.min(sortedHolders.length, 55);
+
+                for (let rankIndex = 0; rankIndex < displayRowsLimit; rankIndex++) {
+                    const record = sortedHolders[rankIndex];
+                    let rewardTokenValue = "0.008 ETH";
+                    if (rankIndex === 0) rewardTokenValue = "0.500 ETH";
+                    else if (rankIndex < 10) rewardTokenValue = "0.100 ETH";
+                    else if (rankIndex < 20) rewardTokenValue = "0.050 ETH";
+                    else if (rankIndex < 30) rewardTokenValue = "0.020 ETH";
+
+                    let buttonStateAttr = "";
+                    let btnLabelText = "Claim Reward";
+                    
+                    if (localStorage.getItem(`claimed_lock_rank_${rankIndex}`) === "true") {
+                        buttonStateAttr = "disabled";
+                        btnLabelText = "Locked";
+                    }
+
+                    leaderboardRowsHtml += `
+                        <tr>
+                            <td><strong>${rankIndex + 1}</strong></td>
+                            <td>${record.address}</td>
+                            <td>${record.count} NFTs</td>
+                            <td><span style="color:#10b981; font-weight:700;">${rewardTokenValue}</span></td>
+                            <td><button class="claim-btn-node" ${buttonStateAttr} onclick="processRewardVerificationMatch('${record.address}', ${rankIndex}, this)">${btnLabelText}</button></td>
+                        </tr>
+                    `;
+                }
+
+                if (displayRowsLimit === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="empty-state-msg">Scanning live blockchain data... Table will populate automatically.</td></tr>`;
+                } else {
+                    tbody.innerHTML = leaderboardRowsHtml;
+                }
+            } catch (err) {
+                console.error("Leaderboard Live Synthesis Process Error:", err);
             }
         }
 
-        function updateQuantityValue(direction) {
-            const field = document.getElementById('mintQtyView');
-            let updated = parseInt(field.value) + direction;
-            if(updated < 1) updated = 1;
-            if(updated > 10) updated = 10;
-            field.value = updated;
-        }
-
-        async function dispatchMintIntent() {
-            if(!activeEthersSignerInstance) {
+        function processRewardVerificationMatch(targetHolderAddress, rankID, elementButton) {
+            if (!activeUserWalletAddress) {
+                alert("Please synchronize and connect your Web3 wallet address inside the header module first.");
                 openWalletSelectionPortal();
                 return;
             }
-            const mintContractNode = new ethers.Contract(TARGET_CONTRACT, COMPACT_ABI, activeEthersSignerInstance);
-            const targetQty = parseInt(document.getElementById('mintQtyView').value);
+
+            if (activeUserWalletAddress.toLowerCase() === targetHolderAddress.toLowerCase()) {
+                alert("Verification Successful! Your active connection perfectly matches this leaderboard rank status.");
+                alert("Notice: You can claim your reward after 24 hours if you maintain your position on the leaderboard.");
+                
+                elementButton.disabled = true;
+                elementButton.innerText = "Locked";
+                localStorage.setItem(`claimed_lock_rank_${rankID}`, "true");
+            } else {
+                alert("Verification Failed. Your active wallet address does not match the holder address linked to this rank entry.");
+            }
+        }
+
+        async function pullRecentLiveDispatchedMints(totalMinted) {
+            const feedContainer = document.getElementById('globalGalleryFeedBox');
+            if (totalMinted === 0) {
+                feedContainer.innerHTML = `<p class="empty-state-msg" style="width:100%;">No mint activity processed recently across the block grid.</p>`;
+                return;
+            }
 
             try {
-                const currentPhaseRaw = await activeViewContractNode.currentPhase();
-                const currentPhase = ethers.BigNumber.from(currentPhaseRaw).toNumber();
+                let feedItemsHtml = "";
+                const totalFeedCardsCount = Math.min(totalMinted, 14);
                 
-                // Public or Whitelist paid price calculation structure
+                let tokenFetchIndexList = [];
+                for (let k = 0; k < totalFeedCardsCount; k++) {
+                    tokenFetchIndexList.push(totalMinted - k);
+                }
+
+                let promiseFeedGroup = [];
+                tokenFetchIndexList.forEach(id => {
+                    promiseFeedGroup.push(
+                        mintContractNode.ownerOf(id).then(owner => ({ id: id, owner: owner })).catch(() => null)
+                    );
+                });
+
+                const feedOutputResults = await Promise.all(promiseFeedGroup);
+
+                feedOutputResults.forEach(card => {
+                    if (card) {
+                        let sampleVisualId = (card.id % 5) + 1;
+                        let clippedOwner = `${card.owner.substring(0, 4)}...${card.owner.substring(39)}`;
+                        feedItemsHtml += `
+                            <div class="gallery-card">
+                                <img src="https://apesyndicate.github.io/ApeSyndicateImage/${sampleVisualId}.png">
+                                <p>Syndicate #${card.id}</p>
+                                <span style="font-size:10px; color:#6b7280; display:block; margin-top:2px;">Owner: ${clippedOwner}</span>
+                            </div>
+                        `;
+                    }
+                });
+
+                feedContainer.innerHTML = feedItemsHtml || `<p class="empty-state-msg" style="width:100%;">No mint activity processed recently across the block grid.</p>`;
+            } catch (err) {
+                console.error("Live Feed Dispatched View Grid Compilation Error:", err);
+            }
+        }
+
+        async function dispatchMintIntent() {
+            if (!activeUserWalletAddress) {
+                openWalletSelectionPortal();
+                return;
+            }
+
+            const targetQty = parseInt(document.getElementById('mintQtyView').value);
+            try {
                 const etherValue = ethers.utils.parseEther((0.0015 * targetQty).toString());
-                
                 let tx = null;
-                if(currentPhase === 1) {
-                    // GTD Mint Stage
+                
+                if (currentPhase === 1) {
                     tx = await mintContractNode.mintGTD();
-                } else if(currentPhase === 2) {
-                    // FCFS Paid Mint Stage
+                } else if (currentPhase === 2) {
                     tx = await mintContractNode.mintFCFS(targetQty, { value: etherValue });
-                } else if(currentPhase === 3) {
-                    // Public Paid Mint Stage (Accepts any user wallet and bypasses static whitelists)
+                } else if (currentPhase === 3) {
                     tx = await mintContractNode.mintPublic(targetQty, { value: etherValue });
                 } else {
-                    alert("Mint stage is currently inactive or paused on-chain.");
-                    return;
+                    tx = await mintContractNode.mintPublic(targetQty, { value: etherValue });
                 }
 
                 alert("Transaction processing broadcasted. Confirming blocks...");
@@ -955,10 +952,6 @@
                 console.error(err);
                 alert("Execution error: Verify network funds or contract phase restrictions.");
             }
-        }
-
-        function executeClaimSequence(val) {
-            alert(`Connecting directly to Distribution Vault... Requesting reward distribution for ${val} ETH.`);
         }
     </script>
 </body>
