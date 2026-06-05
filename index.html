@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ape Syndicate - Official Mint Station</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -35,7 +35,6 @@
                 radial-gradient(circle at 0% 0%, #fae8ff 0%, transparent 40%),
                 radial-gradient(circle at 100% 100%, #e0e7ff 0%, transparent 40%);
             background-attachment: fixed;
-            word-wrap: break-word;
         }
 
         header {
@@ -71,7 +70,6 @@
             cursor: pointer;
             box-shadow: var(--shadow-sm);
             transition: all 0.2s ease;
-            white-space: nowrap;
         }
 
         .connect-btn:hover {
@@ -98,7 +96,6 @@
             padding: 30px;
             width: 100%;
             max-width: 1000px;
-            overflow: hidden;
         }
 
         .mint-container {
@@ -116,7 +113,6 @@
             aspect-ratio: 1/1;
             background: #fff;
             border: 4px solid #fff;
-            width: 100%;
         }
 
         .media-frame img {
@@ -133,7 +129,6 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            width: 100%;
         }
 
         .mint-details h1 {
@@ -161,7 +156,6 @@
             padding: 16px;
             border-radius: 14px;
             border: 1px solid rgba(124, 58, 237, 0.06);
-            width: 100%;
         }
 
         .matrix-row {
@@ -169,15 +163,12 @@
             justify-content: space-between;
             align-items: center;
             padding: 6px 0;
-            gap: 10px;
         }
 
         .tier-tag {
             font-size: 13px;
             font-weight: 700;
             color: var(--text-main);
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .eligibility-indicator {
@@ -185,8 +176,6 @@
             font-weight: 700;
             padding: 4px 10px;
             border-radius: 6px;
-            white-space: nowrap;
-            text-align: center;
         }
 
         .status-checking { background: #e2e8f0; color: #475569; }
@@ -240,8 +229,6 @@
             cursor: pointer;
             box-shadow: var(--shadow-sm);
             transition: all 0.2s;
-            width: 100%;
-            text-align: center;
         }
 
         .submit-mint-btn:hover {
@@ -269,9 +256,6 @@
             text-decoration: none;
             font-size: 14px;
             transition: all 0.2s;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .nav-card-btn:hover {
@@ -291,8 +275,7 @@
             display: flex;
             gap: 12px;
             overflow-x: auto;
-            padding-bottom: 10px;
-            width: 100%;
+            padding-bottom: 6px;
         }
 
         .asset-node {
@@ -302,21 +285,19 @@
             border-radius: 14px;
             min-width: 110px;
             text-align: center;
-            flex-shrink: 0;
         }
 
         .asset-node img {
             width: 100%;
             border-radius: 8px;
             margin-bottom: 6px;
-            aspect-ratio: 1/1;
-            object-fit: cover;
         }
 
         .asset-node span {
             font-size: 12px;
             font-weight: 700;
             display: block;
+            white-space: nowrap;
         }
 
         .reward-structure-grid {
@@ -324,7 +305,6 @@
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 12px;
             margin-bottom: 24px;
-            width: 100%;
         }
 
         .reward-tier-card {
@@ -351,8 +331,8 @@
         .table-container {
             width: 100%;
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.3);
         }
 
         .leaderboard-table {
@@ -363,18 +343,18 @@
 
         .leaderboard-table th {
             text-align: left;
-            padding: 14px;
+            padding: 12px;
             font-family: 'Space Grotesk', sans-serif;
             font-size: 13px;
             color: var(--text-muted);
             border-bottom: 1px solid var(--glass-border);
-            background: rgba(255, 255, 255, 0.5);
+            white-space: nowrap;
         }
 
         .leaderboard-table td {
-            padding: 14px;
+            padding: 12px;
             font-size: 14px;
-            border-bottom: 1px solid rgba(124, 58, 237, 0.04);
+            border-bottom: 1px solid rgba(0,0,0,0.02);
             white-space: nowrap;
         }
 
@@ -387,27 +367,20 @@
             font-weight: 700;
             font-size: 12px;
             cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .claim-btn-node:hover {
-            background: #059669;
         }
 
         .empty-state-msg {
             color: var(--text-muted);
             font-size: 14px;
-            padding: 30px 12px;
+            padding: 25px 12px;
             text-align: center;
             font-weight: 500;
-            width: 100%;
         }
 
         .gallery-wrapper {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 16px;
-            width: 100%;
         }
 
         .gallery-card {
@@ -417,7 +390,6 @@
             padding: 8px;
             text-align: center;
             box-shadow: var(--shadow-sm);
-            animation: fadeIn 0.5s ease;
         }
 
         .gallery-card img {
@@ -494,23 +466,15 @@
             font-weight: 600;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         @media (max-width: 768px) {
-            header { padding: 15px 20px; }
+            header { padding: 12px 20px; }
             .logo { font-size: 20px; }
-            .connect-btn { padding: 10px 16px; font-size: 14px; }
-            main { padding: 0 15px 40px 15px; margin-top: 90px; gap: 20px; }
+            .connect-btn { padding: 10px 18px; font-size: 14px; }
+            main { padding: 0 12px 40px 12px; margin-top: 90px; gap: 20px; }
             .mint-container { grid-template-columns: 1fr; gap: 24px; }
             .glass-panel { padding: 20px; border-radius: 20px; }
-            .mint-details h1 { font-size: 28px; text-align: center; }
-            .live-counter { display: block; text-align: center; margin: 0 auto; width: max-content; }
-            .qty-selector { justify-content: center; }
+            .mint-details h1 { font-size: 28px; }
             .navigation-links { flex-direction: column; gap: 8px; }
-            .nav-card-btn { width: 100%; text-align: center; }
             .reward-structure-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
@@ -526,8 +490,8 @@
         <section class="glass-panel">
             <div class="mint-container">
                 <div class="media-frame">
-                    <img id="slideshowFrameA" src="https://apesyndicate.github.io/ApeSyndicateImage/0.png" style="opacity: 1;">
-                    <img id="slideshowFrameB" src="https://apesyndicate.github.io/ApeSyndicateImage/1.png" style="opacity: 0;">
+                    <img id="slideshowFrameA" src="https://apesyndicate.github.io/ApeSyndicateImage/1.png" style="opacity: 1;">
+                    <img id="slideshowFrameB" src="https://apesyndicate.github.io/ApeSyndicateImage/2.png" style="opacity: 0;">
                 </div>
                 <div class="mint-details">
                     <h1>Ape Syndicate</h1>
@@ -608,7 +572,6 @@
         <section class="glass-panel">
             <h3 class="dashboard-title">Live Dispatched Mint Feed</h3>
             <div class="gallery-wrapper" id="globalGalleryFeedBox">
-                <p class="empty-state-msg">Syncing real-time mint logs from Ethereum Mainnet...</p>
             </div>
         </section>
     </main>
@@ -627,7 +590,7 @@
 
     <script>
         const TARGET_CONTRACT = "0xa744f823A34fE99f753f7a511e32EAb806117D1a";
-        const SYSTEM_RPC = "https://eth-mainnet.g.alchemy.com/v2/fYKMDL9NELcMLpplFxENG";
+        const SYSTEM_RPC = "https://eth-mainnet.g.alchemy.com/v2/fYKMDL9NELcMLpplFxENG"; 
 
         const COMPACT_ABI = [
             {"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
@@ -635,7 +598,11 @@
             {"inputs":[],"name":"isMintCompleted","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
             {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"gtdWhitelist","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
-            {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"fcfsWhitelist","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"}
+            {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"fcfsWhitelist","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"mintGTD","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"quantity","type":"uint256"}],"name":"mintFCFS","outputs":[],"stateMutability":"payable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"quantity","type":"uint256"}],"name":"mintPublic","outputs":[],"stateMutability":"payable","type":"function"},
+            {"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"uint256","name":"index","type":"uint256"}],"name":"tokenOfOwnerByIndex","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
         ];
 
         let globalInjectedWeb3Provider = null;
@@ -649,16 +616,16 @@
             initiateSlideshowEngine();
             synchronizeBlockchainStateData();
             listenToLiveContractEvents();
-            setInterval(synchronizeBlockchainStateData, 15000); 
+            setInterval(synchronizeBlockchainStateData, 10000); 
         });
 
         function initiateSlideshowEngine() {
-            let index = 0;
+            let index = 1;
             const frameA = document.getElementById('slideshowFrameA');
             const frameB = document.getElementById('slideshowFrameB');
             
             setInterval(() => {
-                index = index >= 554 ? 0 : index + 1;
+                index = index >= 555 ? 1 : index + 1;
                 if (frameA.style.opacity == "1") {
                     frameB.src = `https://apesyndicate.github.io/ApeSyndicateImage/${index}.png`;
                     frameA.style.opacity = "0";
@@ -678,6 +645,9 @@
                 document.getElementById('globalSupplyCount').innerText = totalInt;
                 
                 processOnChainTransferLogs();
+                if(userConnectedWalletAddress) {
+                    evaluateUserEligibilityMetrics();
+                }
             } catch (err) {
                 console.error("RPC synchronization stream error:", err);
             }
@@ -690,9 +660,6 @@
             };
             baseStaticRpcProvider.on(transferFilter, (log) => {
                 synchronizeBlockchainStateData();
-                if(userConnectedWalletAddress) {
-                    evaluateUserEligibilityMetrics();
-                }
             });
         }
 
@@ -719,7 +686,7 @@
                 }
 
                 if(!selectedRuntimeProvider) {
-                    alert("Wallet extension node not detected.");
+                    alert("Wallet extension node not detected. Please install context.");
                     return;
                 }
 
@@ -748,7 +715,7 @@
                     fromBlock: "0x0",
                     toBlock: "latest",
                     address: TARGET_CONTRACT,
-                    topics: [topicTransfer, hexZero]
+                    topics: [topicTransfer]
                 });
 
                 const holderMap = {};
@@ -759,31 +726,43 @@
                     document.getElementById('leaderboardDataBody').innerHTML = `
                         <tr><td colspan="5" class="empty-state-msg">No active mint data discovered on-chain yet. Table will populate automatically.</td></tr>
                     `;
-                    galleryContainer.innerHTML = `<p class="empty-state-msg">No minted tokens found on-chain yet.</p>`;
                     return;
                 }
 
                 rawLogs.forEach((log) => {
-                    const recipientAddress = ethers.utils.defaultAbiCoder.decode(["address"], log.topics[2])[0];
+                    const fromAddress = ethers.utils.defaultAbiCoder.decode(["address"], log.topics[1])[0].toLowerCase();
+                    const recipientAddress = ethers.utils.defaultAbiCoder.decode(["address"], log.topics[2])[0].toLowerCase();
                     const tokenId = ethers.BigNumber.from(log.topics[3]).toNumber();
 
-                    holderMap[recipientAddress] = (holderMap[recipientAddress] || 0) + 1;
+                    if (fromAddress !== ethers.constants.AddressZero.toLowerCase()) {
+                        if (holderMap[fromAddress]) {
+                            holderMap[fromAddress] = holderMap[fromAddress] - 1;
+                            if (holderMap[fromAddress] <= 0) delete holderMap[fromAddress];
+                        }
+                    }
 
-                    const feedCard = document.createElement('div');
-                    feedCard.className = "gallery-card";
-                    feedCard.innerHTML = `
-                        <img src="https://apesyndicate.github.io/ApeSyndicateImage/${tokenId}.png" onerror="this.src='https://placehold.co/130x130/f3e8ff/7c3aed?text=APE'">
-                        <p>Syndicate #${tokenId}</p>
-                    `;
-                    if (galleryContainer.firstChild) {
-                        galleryContainer.insertBefore(feedCard, galleryContainer.firstChild);
-                    } else {
-                        galleryContainer.appendChild(feedCard);
+                    if (recipientAddress !== ethers.constants.AddressZero.toLowerCase()) {
+                        holderMap[recipientAddress] = (holderMap[recipientAddress] || 0) + 1;
+                    }
+
+                    if (fromAddress === ethers.constants.AddressZero.toLowerCase()) {
+                        const feedCard = document.createElement('div');
+                        feedCard.className = "gallery-card";
+                        feedCard.innerHTML = `
+                            <img src="https://apesyndicate.github.io/ApeSyndicateImage/${tokenId}.png" onerror="this.src='https://placehold.co/120x120/f3e8ff/7c3aed?text=APE'">
+                            <p>Syndicate #${tokenId}</p>
+                        `;
+                        if (galleryContainer.firstChild) {
+                            galleryContainer.insertBefore(feedCard, galleryContainer.firstChild);
+                        } else {
+                            galleryContainer.appendChild(feedCard);
+                        }
                     }
                 });
 
                 const sortedHolders = Object.entries(holderMap)
                     .map(([address, count]) => ({ address, count }))
+                    .filter(h => h.count > 0 && h.address !== ethers.constants.AddressZero.toLowerCase())
                     .sort((a, b) => b.count - a.count);
 
                 renderProductionLeaderboard(sortedHolders);
@@ -796,12 +775,13 @@
             const tbody = document.getElementById('leaderboardDataBody');
             tbody.innerHTML = "";
 
-            let isMintCompleted = false;
-            try {
-                isMintCompleted = await activeViewContractNode.isMintCompleted();
-            } catch(e) {}
-            
+            const isMintCompleted = await activeViewContractNode.isMintCompleted();
             const boundaryMax = Math.min(sortedHolders.length, 55);
+
+            if (boundaryMax === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="empty-state-msg">No active owners discovered on-chain yet.</td></tr>`;
+                return;
+            }
 
             for (let rank = 1; rank <= boundaryMax; rank++) {
                 const entity = sortedHolders[rank - 1];
@@ -816,7 +796,7 @@
                 else if(rank >= 21 && rank <= 30) { rewardText = "0.020 ETH"; rawRewardValue = "0.02"; }
 
                 const row = document.createElement('tr');
-                let actionCell = `<span style="color:var(--text-muted); font-size:12px; font-weight:600;">Locked until sld-out</span>`;
+                let actionCell = `<span style="color:var(--text-muted); font-size:12px; font-weight:600;">Locked until 24h post-mint</span>`;
                 
                 if (isMintCompleted && userConnectedWalletAddress && cleanAddress.toLowerCase() === userConnectedWalletAddress.toLowerCase()) {
                     actionCell = `<button class="claim-btn-node" onclick="executeClaimSequence('${rawRewardValue}')">Claim ${rewardText}</button>`;
@@ -877,41 +857,55 @@
             }
 
             try {
+                // Tracking 0-indexed tokens according to ERC721A mint order logs
                 const topicTransfer = ethers.utils.id("Transfer(address,address,uint256)");
-                const hexUser = ethers.utils.hexZeroPad(userConnectedWalletAddress, 32);
-                
-                const userLogs = await baseStaticRpcProvider.getLogs({
+                const rawLogs = await baseStaticRpcProvider.getLogs({
                     fromBlock: "0x0",
                     toBlock: "latest",
                     address: TARGET_CONTRACT,
-                    topics: [topicTransfer, null, hexUser]
+                    topics: [topicTransfer]
                 });
 
-                if (userLogs.length === 0) {
-                     for (let i = 0; i < balance; i++) {
-                        const node = document.createElement('div');
-                        node.className = "asset-node";
-                        node.innerHTML = `
-                            <img src="https://placehold.co/100x100/f3e8ff/7c3aed?text=APE" alt="APE">
-                            <span>Syndicate NFT</span>
-                        `;
-                        container.appendChild(node);
+                const ownedTokenIds = [];
+                rawLogs.forEach((log) => {
+                    const fromAddress = ethers.utils.defaultAbiCoder.decode(["address"], log.topics[1])[0].toLowerCase();
+                    const recipientAddress = ethers.utils.defaultAbiCoder.decode(["address"], log.topics[2])[0].toLowerCase();
+                    const tokenId = ethers.BigNumber.from(log.topics[3]).toNumber();
+
+                    if (recipientAddress === userConnectedWalletAddress.toLowerCase()) {
+                        if (!ownedTokenIds.includes(tokenId)) ownedTokenIds.push(tokenId);
                     }
+                    if (fromAddress === userConnectedWalletAddress.toLowerCase()) {
+                        const idx = ownedTokenIds.indexOf(tokenId);
+                        if (idx > -1) ownedTokenIds.splice(idx, 1);
+                    }
+                });
+
+                if (ownedTokenIds.length === 0) {
+                    container.innerHTML = `<p class="empty-state-msg">Your wallet does not hold any tokens of this collection yet.</p>`;
                     return;
                 }
 
-                userLogs.forEach((log) => {
-                    const tokenId = ethers.BigNumber.from(log.topics[3]).toNumber();
+                ownedTokenIds.forEach((id) => {
                     const node = document.createElement('div');
                     node.className = "asset-node";
                     node.innerHTML = `
-                        <img src="https://apesyndicate.github.io/ApeSyndicateImage/${tokenId}.png" onerror="this.src='https://placehold.co/100x100/f3e8ff/7c3aed?text=APE'">
-                        <span>Ape #${tokenId}</span>
+                        <img src="https://apesyndicate.github.io/ApeSyndicateImage/${id}.png" onerror="this.src='https://placehold.co/100x100/f3e8ff/7c3aed?text=APE'">
+                        <span>Syndicate #${id}</span>
                     `;
                     container.appendChild(node);
                 });
-            } catch(e) {
-                console.error("Error rendering portfolio inventory:", e);
+            } catch (error) {
+                // Fallback rendering map if log compilation lags
+                for (let i = 0; i < balance; i++) {
+                    const node = document.createElement('div');
+                    node.className = "asset-node";
+                    node.innerHTML = `
+                        <img src="https://placehold.co/100x100/f3e8ff/7c3aed?text=APE" style="opacity:0.6;">
+                        <span>Syndicate Asset</span>
+                    `;
+                    container.appendChild(node);
+                }
             }
         }
 
@@ -928,34 +922,28 @@
                 openWalletSelectionPortal();
                 return;
             }
-            
-            const abiWithMint = [
-                ...COMPACT_ABI,
-                {"inputs":[],"name":"mintGTD","outputs":[],"stateMutability":"nonpayable","type":"function"},
-                {"inputs":[{"internalType":"uint256","name":"quantity","type":"uint256"}],"name":"mintFCFS","outputs":[],"stateMutability":"payable","type":"function"},
-                {"inputs":[{"internalType":"uint256","name":"quantity","type":"uint256"}],"name":"mintPublic","outputs":[],"stateMutability":"payable","type":"function"}
-            ];
-
-            const mintContractNode = new ethers.Contract(TARGET_CONTRACT, abiWithMint, activeEthersSignerInstance);
+            const mintContractNode = new ethers.Contract(TARGET_CONTRACT, COMPACT_ABI, activeEthersSignerInstance);
             const targetQty = parseInt(document.getElementById('mintQtyView').value);
 
             try {
                 const currentPhaseRaw = await activeViewContractNode.currentPhase();
-                const currentPhase = parseInt(currentPhaseRaw.toString());
+                const currentPhase = ethers.BigNumber.from(currentPhaseRaw).toNumber();
+                
+                // Public or Whitelist paid price calculation structure
+                const etherValue = ethers.utils.parseEther((0.0015 * targetQty).toString());
                 
                 let tx = null;
                 if(currentPhase === 1) {
+                    // GTD Mint Stage
                     tx = await mintContractNode.mintGTD();
                 } else if(currentPhase === 2) {
-                    const pricePerNft = ethers.utils.parseEther("0.0015");
-                    const calculatedValue = pricePerNft.mul(targetQty);
-                    tx = await mintContractNode.mintFCFS(targetQty, { value: calculatedValue });
+                    // FCFS Paid Mint Stage
+                    tx = await mintContractNode.mintFCFS(targetQty, { value: etherValue });
                 } else if(currentPhase === 3) {
-                    const pricePerNft = ethers.utils.parseEther("0.0015");
-                    const calculatedValue = pricePerNft.mul(targetQty);
-                    tx = await mintContractNode.mintPublic(targetQty, { value: calculatedValue });
+                    // Public Paid Mint Stage (Accepts any user wallet and bypasses static whitelists)
+                    tx = await mintContractNode.mintPublic(targetQty, { value: etherValue });
                 } else {
-                    alert("Mint stage is currently inactive.");
+                    alert("Mint stage is currently inactive or paused on-chain.");
                     return;
                 }
 
@@ -963,10 +951,9 @@
                 await tx.wait();
                 alert("Mint sequence verified!");
                 synchronizeBlockchainStateData();
-                evaluateUserEligibilityMetrics();
             } catch (err) {
                 console.error(err);
-                alert("Execution error: Verify network funds or whitelist status limits.");
+                alert("Execution error: Verify network funds or contract phase restrictions.");
             }
         }
 
